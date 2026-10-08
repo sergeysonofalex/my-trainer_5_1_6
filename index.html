@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажёр · Программное обеспечение и искусственный интеллект</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#3b82f6;--indigo:#6366f1;--green:#2ecc71;--green-d:#16a34a;
+  --purple:#8b5cf6;--red:#ef4444;--orange:#f59e0b;
+  --ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--bg:#eef3fb;
+}
+html,body{height:100%;}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  background:radial-gradient(circle at 12% 0%,#e6efff 0%,#f5f8fd 45%,#eaf1fb 100%);
+  color:var(--ink);font-size:18px;line-height:1.45;overflow:hidden;
+}
+button{font-family:inherit;}
+.hidden{display:none !important;}
+.screen{display:none;height:100vh;width:100%;}
+.screen.active{display:block;}
+
+/* ================= СТАРТОВЫЙ ЭКРАН ================= */
+#screen-start.active{display:flex;align-items:center;justify-content:center;padding:18px;}
+.start-card{
+  background:#fff;border-radius:28px;padding:30px 46px 34px;max-width:780px;width:100%;
+  box-shadow:0 20px 55px rgba(30,64,175,.14);text-align:center;
+  max-height:96vh;overflow-y:auto;
+}
+.icon-row{display:flex;justify-content:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+.icon-bubble{
+  width:60px;height:60px;border-radius:18px;display:grid;place-items:center;
+  box-shadow:0 6px 16px rgba(15,23,42,.10);
+}
+.icon-bubble svg{width:32px;height:32px;}
+.ib-blue{background:#dbeafe;color:#2563eb;}
+.ib-green{background:#dcfce7;color:#16a34a;}
+.ib-purple{background:#ede9fe;color:#7c3aed;}
+.ib-orange{background:#ffedd5;color:#ea580c;}
+.ib-pink{background:#fce7f3;color:#db2777;}
+.start-card h1{font-size:31px;line-height:1.2;margin-bottom:8px;color:#0f172a;letter-spacing:-.4px;}
+.subtitle{color:var(--muted);font-size:17px;margin-bottom:16px;}
+.chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+.chip-info{
+  background:#f1f5f9;border:1.5px solid var(--line);border-radius:999px;
+  padding:6px 15px;font-size:15px;font-weight:600;color:#475569;
+}
+.name-label{display:block;text-align:left;font-weight:700;font-size:17px;margin-bottom:8px;color:#334155;}
+#nameInput{
+  width:100%;padding:15px 18px;font-size:21px;font-weight:600;font-family:inherit;
+  border:3px solid #2ecc71;background-color:#f0fff4;border-radius:16px;color:#14532d;
+  outline:none;transition:box-shadow .2s,transform .12s;
+}
+#nameInput:focus{box-shadow:0 0 0 5px rgba(46,204,113,.22);}
+.name-hint{font-size:14px;color:var(--muted);text-align:left;margin-top:8px;min-height:20px;}
+.name-hint.ok{color:#16a34a;font-weight:700;}
+.btn{
+  border:none;border-radius:15px;padding:15px 30px;font-size:19px;font-weight:700;
+  cursor:pointer;transition:transform .12s ease,box-shadow .15s ease,background .2s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 8px 20px rgba(59,130,246,.38);}
+.btn-primary:hover:not(:disabled){box-shadow:0 10px 26px rgba(59,130,246,.5);}
+.btn-primary:disabled{background:#cbd5e1;color:#94a3b8;box-shadow:none;cursor:not-allowed;transform:none;}
+.btn-green{background:linear-gradient(135deg,#2ecc71,#16a34a);color:#fff;box-shadow:0 8px 20px rgba(46,204,113,.4);}
+.btn-green:hover{box-shadow:0 10px 26px rgba(46,204,113,.55);}
+#startBtn{width:100%;margin-top:18px;padding:18px;font-size:21px;}
+
+/* ================= ЭКРАН ТЕСТА ================= */
+.quiz-shell{
+  display:flex;flex-direction:column;height:100vh;width:100%;max-width:1080px;
+  margin:0 auto;padding:14px 22px 16px;gap:12px;
+}
+.quiz-header{display:flex;align-items:center;gap:16px;flex:0 0 auto;}
+.stage-badge{padding:7px 16px;border-radius:999px;font-size:15px;font-weight:700;white-space:nowrap;}
+.stage-badge.s1{background:#dbeafe;color:#1d4ed8;}
+.stage-badge.s2{background:#ede9fe;color:#6d28d9;}
+.qh-mid{flex:1;min-width:100px;}
+.progress{height:12px;background:#e2e8f0;border-radius:999px;overflow:hidden;}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:999px;transition:width .35s ease;}
+#taskCounter{font-size:15px;color:var(--muted);font-weight:700;white-space:nowrap;}
+
+.task-card{
+  flex:1 1 auto;overflow-y:auto;background:#fff;border-radius:22px;
+  box-shadow:0 12px 34px rgba(30,64,175,.10);padding:22px 28px;
+}
+.task-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.task-num{
+  flex:0 0 auto;width:44px;height:44px;border-radius:14px;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:20px;
+  box-shadow:0 5px 14px rgba(99,102,241,.35);
+}
+.task-q{font-size:21px;font-weight:700;line-height:1.35;color:#0f172a;padding-top:5px;}
+.hint-row{margin-bottom:10px;}
+.hint-btn{
+  background:#fff7ed;border:2px solid #fed7aa;color:#c2410c;border-radius:12px;
+  padding:7px 16px;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.hint-btn:hover{background:#ffedd5;transform:translateY(-1px);}
+.hint-box{
+  background:#fff7ed;border-left:5px solid #f59e0b;border-radius:12px;
+  padding:12px 16px;font-size:17px;color:#7c2d12;margin-bottom:14px;
+  animation:fadeIn .25s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+.answer-area{display:flex;flex-direction:column;gap:11px;}
+.option{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  border:2.5px solid var(--line);border-radius:15px;padding:13px 18px;
+  background:#fff;cursor:pointer;font-size:18px;color:#1e293b;
+  transition:border-color .15s,background .15s,transform .12s,box-shadow .15s;
+}
+.option:hover:not(:disabled){border-color:#93c5fd;background:#f0f7ff;transform:translateY(-1px);}
+.option .mark{
+  flex:0 0 auto;width:32px;height:32px;border-radius:50%;border:2.5px solid #cbd5e1;
+  display:grid;place-items:center;font-weight:800;font-size:15px;color:#94a3b8;transition:all .15s;
+}
+.option.selected{border-color:var(--blue);background:#eff6ff;box-shadow:0 0 0 3px rgba(59,130,246,.16);}
+.option.selected .mark{border-color:var(--blue);background:var(--blue);color:#fff;}
+.option.correct{border-color:var(--green);background:#f0fff4;animation:pulseG .45s ease;box-shadow:0 0 0 3px rgba(46,204,113,.18);}
+.option.correct .mark{border-color:var(--green);background:var(--green);color:#fff;}
+.option.wrong{border-color:var(--red);background:#fef2f2;animation:shake .4s ease;}
+.option.wrong .mark{border-color:var(--red);background:var(--red);color:#fff;}
+@keyframes pulseG{0%{transform:scale(1);}50%{transform:scale(1.025);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-7px);}60%{transform:translateX(7px);}80%{transform:translateX(-3px);}}
+.tf-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* --- соответствие --- */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{
+  display:flex;align-items:center;gap:11px;text-align:left;
+  border:2.5px solid var(--line);border-radius:14px;padding:12px 14px;
+  background:#fff;cursor:pointer;font-size:17px;color:#1e293b;
+  transition:all .15s;
+}
+.match-item:hover:not(:disabled){border-color:#c4b5fd;background:#faf8ff;}
+.match-item.selected{border-color:var(--purple);background:#f5f3ff;box-shadow:0 0 0 3px rgba(139,92,246,.18);}
+.match-item.paired{border-color:#a5b4fc;background:#eef2ff;}
+.match-item.correct{border-color:var(--green);background:#f0fff4;}
+.match-item.wrong{border-color:var(--red);background:#fef2f2;}
+.m-badge{
+  flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:#e2e8f0;color:#475569;
+  display:grid;place-items:center;font-weight:800;font-size:15px;
+}
+.match-item.paired .m-badge{background:#6366f1;color:#fff;}
+.match-item.correct .m-badge{background:var(--green);color:#fff;}
+.match-item.wrong .m-badge{background:var(--red);color:#fff;}
+
+/* --- корзины --- */
+.pool-label{font-size:15px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.pool{
+  background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;
+  padding:12px 14px;margin-bottom:14px;min-height:76px;transition:all .15s;
+}
+.pool.over{border-color:var(--blue);background:#eff6ff;}
+.pool-items{display:flex;flex-wrap:wrap;gap:9px;}
+.basket-grid{display:grid;gap:13px;}
+.basket{
+  border:3px dashed #cbd5e1;border-radius:18px;padding:12px;min-height:150px;
+  background:#f8fafc;transition:all .15s;
+}
+.basket.over{border-color:var(--blue);background:#eff6ff;transform:scale(1.015);}
+.basket h4{font-size:16px;font-weight:800;color:#334155;text-align:center;margin-bottom:9px;}
+.basket[data-basket="0"] h4{color:#1d4ed8;}
+.basket[data-basket="1"] h4{color:#16a34a;}
+.basket[data-basket="2"] h4{color:#7c3aed;}
+.basket .items{display:flex;flex-direction:column;gap:8px;}
+.chip{
+  background:#fff;border:2.5px solid var(--line);border-radius:12px;
+  padding:9px 13px;font-size:16px;cursor:grab;user-select:none;transition:all .15s;
+  box-shadow:0 2px 6px rgba(15,23,42,.05);
+}
+.chip:hover{border-color:#93c5fd;transform:translateY(-1px);}
+.chip.selected{border-color:var(--blue);background:#eff6ff;box-shadow:0 0 0 3px rgba(59,130,246,.18);}
+.chip.correct{border-color:var(--green);background:#f0fff4;}
+.chip.wrong{border-color:var(--red);background:#fef2f2;}
+.chip:active{cursor:grabbing;}
+
+/* --- порядок --- */
+.order-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.col-title{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:9px;}
+.order-pool,.order-seq{display:flex;flex-direction:column;gap:9px;min-height:120px;
+  background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;padding:11px;}
+.order-seq{border-style:solid;border-color:#c7d2fe;background:#f5f7ff;}
+.seq-chip{display:flex;align-items:center;gap:11px;border-color:#a5b4fc;background:#fff;}
+.seq-num{
+  flex:0 0 auto;width:26px;height:26px;border-radius:8px;background:#6366f1;color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:14px;
+}
+.empty-note{font-size:15px;color:#94a3b8;text-align:center;padding:16px 6px;font-style:italic;}
+
+/* --- фидбек --- */
+.feedback{border-radius:16px;padding:14px 18px;margin-top:16px;font-size:17px;animation:fadeIn .25s ease;}
+.feedback.ok{background:#f0fff4;border-left:6px solid var(--green);color:#14532d;}
+.feedback.bad{background:#fef2f2;border-left:6px solid var(--red);color:#7f1d1d;}
+.fb-title{font-weight:800;font-size:18px;margin-bottom:4px;}
+.fb-note{font-size:16px;line-height:1.45;}
+
+.quiz-footer{flex:0 0 auto;display:flex;justify-content:center;gap:14px;}
+.quiz-footer .btn{min-width:220px;}
+@keyframes nudge{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.nudge{animation:nudge .35s ease;}
+
+/* --- оверлей между этапами --- */
+.stage-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.overlay-card{
+  background:#fff;border-radius:26px;padding:36px 44px;max-width:560px;text-align:center;
+  box-shadow:0 24px 60px rgba(15,23,42,.35);animation:pop .3s ease;
+}
+@keyframes pop{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+.ov-emoji{font-size:56px;margin-bottom:10px;}
+.overlay-card h3{font-size:26px;margin-bottom:12px;color:#0f172a;}
+.overlay-card p{color:#475569;font-size:17px;margin-bottom:22px;line-height:1.5;}
+
+/* ================= РЕЗУЛЬТАТ ================= */
+#screen-result.active{display:block;overflow-y:auto;padding:24px 18px 34px;}
+.result-card{
+  max-width:900px;margin:0 auto;background:#fff;border-radius:28px;padding:30px 42px 34px;
+  box-shadow:0 20px 55px rgba(30,64,175,.14);
+}
+.cert-top{text-align:center;font-size:54px;line-height:1;margin-bottom:6px;}
+.result-card h2{text-align:center;font-size:27px;color:#0f172a;margin-bottom:6px;}
+.res-sub{text-align:center;color:var(--muted);font-size:16px;margin-bottom:18px;}
+.student-name{
+  text-align:center;font-size:32px;font-weight:800;color:#1d4ed8;letter-spacing:-.5px;
+  padding:12px 20px;border-radius:18px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+  border:2px dashed #bfdbfe;margin-bottom:20px;word-break:break-word;
+}
+.score-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.score-box{
+  border-radius:20px;padding:18px 14px;text-align:center;background:#f8fafc;
+  border:2.5px solid var(--line);
+}
+.score-box.accent{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-color:#a7f3d0;}
+.score-box .big{font-size:44px;font-weight:800;line-height:1;color:#0f172a;}
+.score-box.accent .big{color:#16a34a;}
+.score-box .lbl{font-size:15px;color:var(--muted);font-weight:600;margin-top:6px;}
+.breakdown{
+  text-align:center;font-size:16px;color:#475569;background:#f1f5f9;border-radius:14px;
+  padding:11px 16px;margin-bottom:22px;
+}
+.descr-title{font-size:19px;font-weight:800;margin-bottom:10px;color:#0f172a;}
+.descr-table{width:100%;border-collapse:separate;border-spacing:0;font-size:16px;margin-bottom:24px;
+  border-radius:16px;overflow:hidden;box-shadow:0 0 0 2px var(--line);}
+.descr-table th{
+  background:#f1f5f9;color:#334155;font-size:15px;text-align:left;padding:11px 15px;font-weight:800;
+}
+.descr-table td{padding:11px 15px;border-top:1.5px solid var(--line);color:#475569;vertical-align:top;}
+.descr-table td:first-child{font-weight:800;color:#1e293b;white-space:nowrap;width:86px;text-align:center;}
+.descr-table tr.active td{background:#f0fff4;color:#14532d;font-weight:700;}
+.descr-table tr.active td:first-child{background:#2ecc71;color:#fff;}
+.result-actions{text-align:center;}
+
+@media (max-width:900px){
+  .match-grid,.order-wrap{grid-template-columns:1fr;}
+  .basket-grid{grid-template-columns:1fr !important;}
+  .task-q{font-size:19px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ ЭКРАН 1: СТАРТ ============ -->
+<div class="screen active" id="screen-start">
+  <div class="start-card">
+    <div class="icon-row">
+      <div class="icon-bubble ib-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="icon-bubble ib-purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01M9.5 17h5"/><circle cx="12" cy="3" r="1.2"/></svg>
+      </div>
+      <div class="icon-bubble ib-pink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5A3 3 0 0 0 6.2 7 3 3 0 0 0 5.4 12.8 3 3 0 0 0 7.5 18a3 3 0 0 0 4.5 1.6V5.5z"/><path d="M12 5.5A3 3 0 0 1 17.8 7a3 3 0 0 1 .8 5.8A3 3 0 0 1 16.5 18a3 3 0 0 1-4.5 1.6V5.5z"/></svg>
+      </div>
+      <div class="icon-bubble ib-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div class="icon-bubble ib-orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg>
+      </div>
+    </div>
+
+    <h1>Программное обеспечение и искусственный интеллект</h1>
+    <p class="subtitle">Информатика и ИИ · 5 класс · практическая работа</p>
+
+    <div class="chips">
+      <span class="chip-info">30 заданий</span>
+      <span class="chip-info">2 этапа</span>
+      <span class="chip-info">до 10 баллов</span>
+      <span class="chip-info">≈ 25 минут</span>
+    </div>
+
+    <label class="name-label" for="nameInput">Введите своё имя и фамилию:</label>
+    <input type="text" id="nameInput" autocomplete="off" spellcheck="false">
+    <div class="name-hint" id="nameHint">Введите минимум 2 символа, чтобы начать работу</div>
+
+    <button class="btn btn-primary" id="startBtn" disabled>Начать практическую работу</button>
+  </div>
+</div>
+
+<!-- ============ ЭКРАН 2: ТЕСТ ============ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-shell">
+    <header class="quiz-header">
+      <span class="stage-badge s1" id="stageBadge">Этап 1 · Базовый уровень</span>
+      <div class="qh-mid"><div class="progress"><div class="progress-fill" id="progressFill"></div></div></div>
+      <div id="taskCounter">Задание 1 из 30</div>
+    </header>
+
+    <main class="task-card">
+      <div class="task-head">
+        <div class="task-num" id="taskNum">1</div>
+        <h2 class="task-q" id="taskQ"></h2>
+      </div>
+      <div class="hint-row">
+        <button class="hint-btn" id="hintBtn">💡 Подсказка</button>
+      </div>
+      <div class="hint-box hidden" id="hintBox"></div>
+      <div class="answer-area" id="answerArea"></div>
+      <div class="feedback hidden" id="feedback"></div>
+    </main>
+
+    <footer class="quiz-footer">
+      <button class="btn btn-primary" id="checkBtn">Проверить</button>
+      <button class="btn btn-green hidden" id="nextBtn">Далее →</button>
+    </footer>
+  </div>
+
+  <div class="stage-overlay hidden" id="stageOverlay">
+    <div class="overlay-card">
+      <div class="ov-emoji">🚀</div>
+      <h3>Этап 1 пройден!</h3>
+      <p>Ты справился со всеми 22 заданиями базового уровня.<br>
+         Впереди — 8 заданий продвинутого уровня: они сложнее, но интереснее!</p>
+      <button class="btn btn-primary" id="toStage2Btn">Перейти к этапу 2 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ЭКРАН 3: РЕЗУЛЬТАТ ============ -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <div class="cert-top">🏆</div>
+    <h2>Практическая работа завершена!</h2>
+    <p class="res-sub">Тема: «Программное обеспечение и искусственный интеллект»</p>
+
+    <div class="student-name" id="resName">—</div>
+
+    <div class="score-row">
+      <div class="score-box">
+        <div class="big" id="resCorrect">0</div>
+        <div class="lbl">правильных ответов из 30</div>
+      </div>
+      <div class="score-box accent">
+        <div class="big" id="resScore">0</div>
+        <div class="lbl">итоговых баллов из 10</div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="resBreak"></div>
+
+    <div class="descr-title">📋 Дескрипторы оценивания</div>
+    <table class="descr-table">
+      <thead>
+        <tr><th>Баллы</th><th>Что показал ученик</th></tr>
+      </thead>
+      <tbody>
+        <tr data-lvl="10"><td>10</td><td>Выполнил все задания 1 и 2 этапов, отлично классифицирует ПО и знает функции ИИ.</td></tr>
+        <tr data-lvl="89"><td>8–9</td><td>Полностью прошёл 1 этап и успешно справился с частью заданий 2 этапа.</td></tr>
+        <tr data-lvl="67"><td>6–7</td><td>Уверенно прошёл 1 этап, знает основные виды ПО и примеры ИИ.</td></tr>
+        <tr data-lvl="45"><td>4–5</td><td>Допустил ошибки в базовых терминах 1 этапа, требуется повторение темы.</td></tr>
+        <tr data-lvl="13"><td>1–3</td><td>Тема усвоена слабо.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="result-actions">
+      <button class="btn btn-green" id="resetBtn">🔄 Повторить / Сброс</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   БАНК ЗАДАНИЙ
+   ========================================================= */
+const TASKS = [
+/* ---------- ЭТАП 1 (1–22) ---------- */
+{stage:1,type:'single',
+ q:'Что такое программное обеспечение (ПО)?',
+ options:['Это все программы и данные, которые работают на компьютере',
+          'Это части компьютера: монитор, клавиатура, мышка',
+          'Это подключение компьютера к интернету',
+          'Это электричество, которое питает компьютер'],
+ correct:0,
+ hint:'ПО ещё называют «софт». Его нельзя потрогать руками, в отличие от «железа».'},
+
+{stage:1,type:'single',
+ q:'Как называют части компьютера, которые можно потрогать руками (монитор, мышь, процессор)?',
+ options:['Железо (аппаратное обеспечение)','Софт (программное обеспечение)','Файл','Браузер'],
+ correct:0,
+ hint:'«Железо» — это hardware. Всё, что можно взять в руки.'},
+
+{stage:1,type:'single',
+ q:'Какая программа нужна, чтобы компьютер включился и смог запускать другие программы?',
+ options:['Операционная система (например, Windows)','Компьютерная игра','Графический редактор','Браузер'],
+ correct:0,
+ hint:'Без операционной системы компьютер не сможет работать вообще.'},
+
+{stage:1,type:'single',
+ q:'Зачем нужен искусственный интеллект?',
+ options:['Чтобы программа могла учиться на примерах и выполнять «умные» задачи',
+          'Чтобы компьютер быстрее нагревался',
+          'Чтобы у компьютера стало больше оперативной памяти',
+          'Чтобы компьютеру не нужна была электроэнергия'],
+ correct:0,
+ hint:'ИИ — это «умные» программы: они учатся на примерах и помогают человеку.'},
+
+{stage:1,type:'single',
+ q:'Какая из программ — прикладная (нужна для конкретной работы пользователя)?',
+ options:['Графический редактор Paint','Операционная система Windows','Драйвер видеокарты','Процессор Intel Core'],
+ correct:0,
+ hint:'Прикладные программы помогают решать конкретную задачу: рисовать, писать текст, играть.'},
+
+{stage:1,type:'single',
+ q:'Что умеет голосовой ИИ-помощник «Алиса»?',
+ options:['Понимать вопрос, заданный голосом, и отвечать на него',
+          'Печатать за тебя домашнюю работу в тетради',
+          'Заряжать телефон без провода',
+          'Мыть посуду'],
+ correct:0,
+ hint:'Алиса распознаёт речь — это одна из технологий искусственного интеллекта.'},
+
+{stage:1,type:'single',
+ q:'Что такое антивирус?',
+ options:['Программа, которая находит и удаляет вредоносные программы',
+          'Программа для рисования картинок',
+          'Часть компьютера внутри корпуса',
+          'Игра про вирусы'],
+ correct:0,
+ hint:'Антивирус — это защитник компьютера.'},
+
+{stage:1,type:'single',
+ q:'Чем программа с искусственным интеллектом отличается от обычной программы?',
+ options:['Она может учиться на примерах и принимать решения',
+          'Она работает без электричества',
+          'Она никогда не ошибается',
+          'Ей не нужен компьютер'],
+ correct:0,
+ hint:'Главное свойство ИИ — способность учиться и принимать решения.'},
+
+{stage:1,type:'tf',
+ q:'Paint — это системная программа.',
+ correct:false,
+ hint:'Paint нужен для рисования, значит это прикладная программа.'},
+
+{stage:1,type:'tf',
+ q:'Антивирус защищает компьютер от вредоносных программ.',
+ correct:true,
+ hint:'Именно для этого антивирус и создан.'},
+
+{stage:1,type:'tf',
+ q:'Искусственный интеллект умеет распознавать голос и лица людей.',
+ correct:true,
+ hint:'Распознавание речи и лиц — известные технологии ИИ.'},
+
+{stage:1,type:'tf',
+ q:'Компьютер может работать без операционной системы.',
+ correct:false,
+ hint:'Операционная система — главная программа, она управляет всем компьютером.'},
+
+{stage:1,type:'tf',
+ q:'Прикладные программы нужны для конкретных задач: рисовать, писать тексты, играть.',
+ correct:true,
+ hint:'Да, прикладные программы решают задачи пользователя.'},
+
+{stage:1,type:'tf',
+ q:'Искусственный интеллект — это живой человек, который спрятан внутри компьютера.',
+ correct:false,
+ hint:'ИИ — это программа, созданная людьми. Человека внутри нет.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси программу и то, для чего она нужна.',
+ pairs:[
+  {term:'Windows',definition:'Операционная система'},
+  {term:'Word',definition:'Работа с текстом'},
+  {term:'Paint',definition:'Рисование'}],
+ hint:'Вспомни, что делает каждая программа.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси программу и её назначение.',
+ pairs:[
+  {term:'Scratch',definition:'Создание игр и программ'},
+  {term:'Excel',definition:'Работа с таблицами и числами'},
+  {term:'Браузер',definition:'Просмотр сайтов в интернете'}],
+ hint:'Браузер — это программа для выхода в интернет.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси ИИ-сервис и то, что он умеет делать.',
+ pairs:[
+  {term:'Алиса',definition:'Голосовой ИИ-помощник'},
+  {term:'ИИ-переводчик',definition:'Перевод текста на другой язык'},
+  {term:'ИИ-фоторедактор',definition:'Улучшение и изменение фотографий'}],
+ hint:'Все эти сервисы работают с помощью искусственного интеллекта.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси программу и её работу.',
+ pairs:[
+  {term:'Антивирус',definition:'Защита от вирусов'},
+  {term:'Архиватор',definition:'Сжатие файлов'},
+  {term:'Медиапроигрыватель',definition:'Воспроизведение музыки и видео'}],
+ hint:'Архиватор уменьшает размер файлов.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси вид программного обеспечения и его задачу.',
+ pairs:[
+  {term:'Операционная система',definition:'Управляет работой всего компьютера'},
+  {term:'Прикладная программа',definition:'Помогает выполнить конкретную задачу'},
+  {term:'Инструментальная программа',definition:'Помогает программисту создавать программы'}],
+ hint:'Инструментальное ПО — это «инструменты» программиста.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси термин и его значение.',
+ pairs:[
+  {term:'Компьютерный вирус',definition:'Вредоносная программа'},
+  {term:'Драйвер',definition:'Программа для управления устройством'},
+  {term:'Файл',definition:'Данные, сохранённые под своим именем'}],
+ hint:'Драйвер нужен, чтобы устройство (принтер, мышь) работало правильно.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси ИИ-технологию и пример её работы.',
+ pairs:[
+  {term:'Нейросеть',definition:'ИИ, который учится на большом количестве примеров'},
+  {term:'Робот-пылесос',definition:'Устройство с ИИ, которое само строит маршрут'},
+  {term:'Распознавание лиц',definition:'ИИ-технология для разблокировки телефона'}],
+ hint:'Нейросеть — основа современного искусственного интеллекта.'},
+
+{stage:1,type:'match',
+ q:'Соотнеси слово и его смысл.',
+ pairs:[
+  {term:'Софт',definition:'Программное обеспечение'},
+  {term:'Железо (hardware)',definition:'Аппаратное обеспечение компьютера'},
+  {term:'Интерфейс',definition:'Способ общения человека с программой'}],
+ hint:'Интерфейс — это кнопки, меню и окна, с которыми мы работаем.'},
+
+/* ---------- ЭТАП 2 (23–30) ---------- */
+{stage:2,type:'basket',
+ q:'Распредели программы по трём корзинам: системное, прикладное, инструментальное ПО.',
+ baskets:['Системное ПО','Прикладное ПО','Инструментальное ПО'],
+ items:[
+  {text:'Windows',basket:0},
+  {text:'Word',basket:1},
+  {text:'Scratch',basket:2},
+  {text:'Драйвер принтера',basket:0}],
+ hint:'Системное — управляет компьютером. Прикладное — для работы пользователя. Инструментальное — для создания программ.'},
+
+{stage:2,type:'basket',
+ q:'Продолжи распределение программ по трём корзинам.',
+ baskets:['Системное ПО','Прикладное ПО','Инструментальное ПО'],
+ items:[
+  {text:'Minecraft',basket:1},
+  {text:'Среда программирования Python',basket:2},
+  {text:'Linux',basket:0},
+  {text:'Браузер',basket:1}],
+ hint:'Linux — это операционная система, как Windows.'},
+
+{stage:2,type:'classify',
+ q:'Определи, где обычная программа, а где — умная программа с ИИ.',
+ baskets:['Обычная программа','Умная программа с ИИ'],
+ items:[
+  {text:'Калькулятор складывает 2 + 2',basket:0},
+  {text:'Голосовой помощник отвечает на вопрос',basket:1},
+  {text:'Будильник звонит в 7:00',basket:0},
+  {text:'Приложение узнаёт лицо друга на фотографии',basket:1}],
+ hint:'Если программа «понимает» и «узнаёт» — скорее всего, в ней есть ИИ.'},
+
+{stage:2,type:'classify',
+ q:'Продолжи: обычная программа или умная программа с ИИ?',
+ baskets:['Обычная программа','Умная программа с ИИ'],
+ items:[
+  {text:'Текстовый редактор сохраняет документ',basket:0},
+  {text:'Робот-пылесос сам объезжает мебель',basket:1},
+  {text:'Переводчик сам переводит текст на другой язык',basket:1},
+  {text:'Часы показывают время',basket:0}],
+ hint:'Обычная программа работает строго по заданным правилам, без обучения.'},
+
+{stage:2,type:'single',
+ q:'Айдару нужно нарисовать рисунок. Какую программу ему выбрать?',
+ options:['Графический редактор Paint','Калькулятор','Антивирус','Музыкальный проигрыватель'],
+ correct:0,
+ hint:'Для рисования нужен графический редактор.'},
+
+{stage:2,type:'single',
+ q:'Айдару нужно написать программу (код). Что ему подойдёт?',
+ options:['Среда программирования Scratch','Paint','Браузер','Архиватор'],
+ correct:0,
+ hint:'Scratch — инструментальная программа для создания программ.'},
+
+{stage:2,type:'single',
+ q:'Айдару нужно быстро перевести текст с английского на русский. Какая программа с ИИ поможет?',
+ options:['ИИ-переводчик','Калькулятор','Медиапроигрыватель','Антивирус'],
+ correct:0,
+ hint:'ИИ-переводчик сам подбирает слова на другом языке.'},
+
+{stage:2,type:'order',
+ q:'Расставь шаги работы с программным обеспечением в правильном порядке.',
+ items:['Включить компьютер',
+        'Дождаться загрузки операционной системы',
+        'Запустить нужную программу',
+        'Ввести данные или запрос',
+        'Получить и проверить результат'],
+ hint:'Сначала «железо» включается, потом загружается ОС, потом запускается программа.'}
+];
+
+/* =========================================================
+   СОСТОЯНИЕ
+   ========================================================= */
+const state = {
+  name: '',
+  i: 0,
+  results: new Array(TASKS.length).fill(null),
+  answered: false
+};
+let selOption = null;
+let matchState = null;
+let basketState = null;
+let orderState = null;
+
+/* =========================================================
+   ВСПОМОГАТЕЛЬНОЕ
+   ========================================================= */
+const $ = s => document.querySelector(s);
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function shakeCheck(){
+  const b = $('#checkBtn');
+  b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+}
+
+/* =========================================================
+   СТАРТОВЫЙ ЭКРАН
+   ========================================================= */
+const nameInput = $('#nameInput');
+const startBtn  = $('#startBtn');
+const nameHint  = $('#nameHint');
+
+nameInput.addEventListener('input', ()=>{
+  const v = nameInput.value.trim();
+  if(v.length >= 2){
+    startBtn.disabled = false;
+    nameHint.textContent = 'Отлично! Можно начинать 👍';
+    nameHint.classList.add('ok');
+  } else {
+    startBtn.disabled = true;
+    nameHint.textContent = 'Введите минимум 2 символа, чтобы начать работу';
+    nameHint.classList.remove('ok');
+  }
+});
+
+startBtn.addEventListener('click', ()=>{
+  const v = nameInput.value.trim();
+  if(v.length < 2) return;
+  state.name = v;
+  state.i = 0;
+  state.results = new Array(TASKS.length).fill(null);
+  showScreen('screen-quiz');
+  renderTask();
+});
+
+/* =========================================================
+   РЕНДЕР ЗАДАНИЯ
+   ========================================================= */
+function renderTask(){
+  const t = TASKS[state.i];
+  state.answered = false;
+  selOption = null;
+  matchState = null; basketState = null; orderState = null;
+
+  /* шапка */
+  const badge = $('#stageBadge');
+  badge.textContent = t.stage === 1 ? 'Этап 1 · Базовый уровень' : 'Этап 2 · Продвинутый уровень';
+  badge.className = 'stage-badge ' + (t.stage === 1 ? 's1' : 's2');
+  $('#taskCounter').textContent = 'Задание ' + (state.i + 1) + ' из ' + TASKS.length;
+  $('#progressFill').style.width = ((state.i / TASKS.length) * 100) + '%';
+
+  $('#taskNum').textContent = state.i + 1;
+  $('#taskQ').textContent = t.q;
+
+  /* подсказка */
+  $('#hintBox').classList.add('hidden');
+  $('#hintBox').textContent = t.hint || '';
+  $('#hintBtn').classList.remove('hidden');
+  if(!t.hint) $('#hintBtn').classList.add('hidden');
+
+  /* фидбек */
+  const fb = $('#feedback');
+  fb.className = 'feedback hidden';
+  fb.innerHTML = '';
+
+  /* кнопки */
+  $('#checkBtn').classList.remove('hidden');
+  $('#checkBtn').disabled = false;
+  $('#nextBtn').classList.add('hidden');
+  $('#nextBtn').textContent = (state.i === TASKS.length - 1) ? 'Показать результат →' : 'Далее →';
+
+  /* область ответа */
+  const area = $('#answerArea');
+  area.innerHTML = '';
+  area.className = 'answer-area';
+
+  if(t.type === 'single')      setupSingle(t);
+  else if(t.type === 'tf')     setupTF(t);
+  else if(t.type === 'match')  setupMatch(t);
+  else if(t.type === 'basket' || t.type === 'classify') setupBasket(t);
+  else if(t.type === 'order')  setupOrder(t);
+}
+
+/* ---------- выбор одного ответа ---------- */
+function setupSingle(t){
+  const area = $('#answerArea');
+  const letters = ['А','Б','В','Г','Д'];
+  t.options.forEach((opt, i)=>{
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.innerHTML = '<span class="mark">' + letters[i] + '</span><span class="otext">' + opt + '</span>';
+    b.addEventListener('click', ()=>{
+      if(state.answered) return;
+      selOption = i;
+      area.querySelectorAll('.option').forEach((e,j)=> e.classList.toggle('selected', j === i));
+    });
+    area.appendChild(b);
+  });
+}
+
+/* ---------- верно / неверно ---------- */
+function setupTF(t){
+  const area = $('#answerArea');
+  const wrap = document.createElement('div');
+  wrap.className = 'tf-row';
+  const variants = [['Верно','✔',true],['Неверно','✘',false]];
+  variants.forEach(([label, sign, val])=>{
+    const b = document.createElement('button');
+    b.className = 'option tf-option';
+    b.innerHTML = '<span class="mark">' + sign + '</span><span class="otext">' + label + '</span>';
+    b.addEventListener('click', ()=>{
+      if(state.answered) return;
+      selOption = val;
+      wrap.querySelectorAll('.option').forEach(e=> e.classList.remove('selected'));
+      b.classList.add('selected');
+    });
+    wrap.appendChild(b);
+  });
+  area.appendChild(wrap);
+}
+
+/* ---------- соответствие ---------- */
+function setupMatch(t){
+  matchState = {
+    terms: t.pairs.map(p=>p.term),
+    defs: shuffle(t.pairs.map((p,i)=>({text:p.definition, pi:i}))),
+    assign: {},
+    sel: null
+  };
+  const area = $('#answerArea');
+  const letters = ['А','Б','В','Г','Д','Е'];
+
+  let html = '<div class="match-grid">';
+  html += '<div class="match-col">';
+  matchState.terms.forEach((term,i)=>{
+    html += '<button class="match-item" data-side="left" data-idx="'+i+'">' +
+              '<span class="m-badge">?</span>' +
+              '<span class="m-text">'+term+'</span></button>';
+  });
+  html += '</div><div class="match-col">';
+  matchState.defs.forEach((d,i)=>{
+    html += '<button class="match-item" data-side="right" data-idx="'+i+'">' +
+              '<span class="m-badge">'+letters[i]+'</span>' +
+              '<span class="m-text">'+d.text+'</span></button>';
+  });
+  html += '</div></div>';
+  area.innerHTML = html;
+
+  area.querySelectorAll('.match-item').forEach(el=>{
+    el.addEventListener('click', ()=> handleMatchClick(el.dataset.side, +el.dataset.idx));
+  });
+}
+
+function handleMatchClick(side, idx){
+  if(state.answered) return;
+  const ms = matchState;
+  const other = side === 'left' ? 'right' : 'left';
+
+  /* если элемент уже связан — снимаем связь */
+  if(side === 'left' && ms.assign[idx] !== undefined) delete ms.assign[idx];
+  if(side === 'right'){
+    for(const k in ms.assign){ if(ms.assign[k] === idx) delete ms.assign[k]; }
+  }
+
+  if(ms.sel && ms.sel.side === other){
+    if(side === 'left') ms.assign[idx] = ms.sel.idx;
+    else ms.assign[ms.sel.idx] = idx;
+    ms.sel = null;
+  } else if(ms.sel && ms.sel.side === side && ms.sel.idx === idx){
+    ms.sel = null;
+  } else {
+    ms.sel = {side, idx};
+  }
+  updateMatchUI();
+}
+
+function updateMatchUI(){
+  const ms = matchState;
+  const area = $('#answerArea');
+  const letters = ['А','Б','В','Г','Д','Е'];
+
+  area.querySelectorAll('.match-item').forEach(el=>{
+    el.classList.remove('selected','paired','correct','wrong');
+  });
+
+  area.querySelectorAll('[data-side="left"]').forEach(el=>{
+    const i = +el.dataset.idx;
+    const badge = el.querySelector('.m-badge');
+    if(ms.assign[i] !== undefined){
+      badge.textContent = letters[ms.assign[i]];
+      el.classList.add('paired');
+    } else {
+      badge.textContent = '?';
+    }
+  });
+
+  area.querySelectorAll('[data-side="right"]').forEach(el=>{
+    const i = +el.dataset.idx;
+    if(Object.values(ms.assign).includes(i)) el.classList.add('paired');
+  });
+
+  if(ms.sel){
+    const selEl = area.querySelector('[data-side="'+ms.sel.side+'"][data-idx="'+ms.sel.idx+'"]');
+    if(selEl) selEl.classList.add('selected');
+  }
+}
+
+/* ---------- корзины ---------- */
+function setupBasket(t){
+  basketState = {
+    place: t.items.map(()=> null),
+    sel: null
+  };
+  const nb = t.baskets.length;
+  const area = $('#answerArea');
+  let html = '<div class="pool" id="pool"><div class="pool-label">Карточки — перетащи их в корзину или нажми карточку, а затем корзину:</div><div class="pool-items" id="poolItems"></div></div>';
+  html += '<div class="basket-grid" style="grid-template-columns:repeat('+nb+',1fr)">';
+  t.baskets.forEach((b,bi)=>{
+    html += '<div class="basket" data-basket="'+bi+'"><h4>'+b+'</h4><div class="items" data-basket-items="'+bi+'"></div></div>';
+  });
+  html += '</div>';
+  area.innerHTML = html;
+
+  const pool = $('#pool');
+  pool.addEventListener('dragover', e=>{ e.preventDefault(); pool.classList.add('over'); });
+  pool.addEventListener('dragleave', ()=> pool.classList.remove('over'));
+  pool.addEventListener('drop', e=>{
+    e.preventDefault(); pool.classList.remove('over');
+    if(state.answered) return;
+    const i = +e.dataTransfer.getData('text/plain');
+    if(!isNaN(i)){ basketState.place[i] = null; basketState.sel = null; paintChips(); }
+  });
+  pool.addEventListener('click', ()=>{
+    if(state.answered) return;
+    if(basketState.sel !== null){ basketState.place[basketState.sel] = null; basketState.sel = null; paintChips(); }
+  });
+
+  area.querySelectorAll('.basket').forEach(b=>{
+    b.addEventListener('dragover', e=>{ e.preventDefault(); b.classList.add('over'); });
+    b.addEventListener('dragleave', ()=> b.classList.remove('over'));
+    b.addEventListener('drop', e=>{
+      e.preventDefault(); b.classList.remove('over');
+      if(state.answered) return;
+      const i = +e.dataTransfer.getData('text/plain');
+      if(!isNaN(i)){ basketState.place[i] = +b.dataset.basket; basketState.sel = null; paintChips(); }
+    });
+    b.addEventListener('click', ()=>{
+      if(state.answered) return;
+      if(basketState.sel !== null){
+        basketState.place[basketState.sel] = +b.dataset.basket;
+        basketState.sel = null;
+        paintChips();
+      }
+    });
+  });
+
+  paintChips();
+}
+
+function paintChips(){
+  const t = TASKS[state.i];
+  const bs = basketState;
+  const poolItems = document.getElementById('poolItems');
+  poolItems.innerHTML = '';
+  t.baskets.forEach((_,bi)=>{
+    const c = document.querySelector('[data-basket-items="'+bi+'"]');
+    if(c) c.innerHTML = '';
+  });
+
+  t.items.forEach((it, i)=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (bs.sel === i ? ' selected' : '');
+    chip.textContent = it.text;
+    chip.draggable = true;
+    chip.dataset.item = i;
+
+    chip.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(state.answered) return;
+      bs.sel = (bs.sel === i) ? null : i;
+      paintChips();
+    });
+    chip.addEventListener('dragstart', e=>{
+      if(state.answered){ e.preventDefault(); return; }
+      bs.sel = i;
+      e.dataTransfer.setData('text/plain', String(i));
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    if(bs.place[i] === null) poolItems.appendChild(chip);
+    else{
+      const dest = document.querySelector('[data-basket-items="'+bs.place[i]+'"]');
+      if(dest) dest.appendChild(chip);
+    }
+  });
+}
+
+/* ---------- порядок ---------- */
+function setupOrder(t){
+  orderState = {
+    pool: shuffle(t.items.map((text,i)=>({text, i}))),
+    seq: []
+  };
+  const area = $('#answerArea');
+  area.innerHTML =
+    '<div class="order-wrap">' +
+      '<div class="order-col"><div class="col-title">Шаги (нажми, чтобы добавить)</div><div class="order-pool" id="orderPool"></div></div>' +
+      '<div class="order-col"><div class="col-title">Твой порядок</div><div class="order-seq" id="orderSeq"></div></div>' +
+    '</div>';
+  paintOrder();
+}
+
+function paintOrder(){
+  const pool = document.getElementById('orderPool');
+  const seq  = document.getElementById('orderSeq');
+  pool.innerHTML = ''; seq.innerHTML = '';
+
+  orderState.pool.slice().forEach(it=>{
+    const c = document.createElement('div');
+    c.className = 'chip';
+    c.textContent = it.text;
+    c.addEventListener('click', ()=>{
+      if(state.answered) return;
+      orderState.pool.splice(orderState.pool.indexOf(it),1);
+      orderState.seq.push(it);
+      paintOrder();
+    });
+    pool.appendChild(c);
+  });
+
+  orderState.seq.slice().forEach((it,k)=>{
+    const c = document.createElement('div');
+    c.className = 'chip seq-chip';
+    c.innerHTML = '<span class="seq-num">'+(k+1)+'</span>' + it.text;
+    c.addEventListener('click', ()=>{
+      if(state.answered) return;
+      orderState.seq.splice(orderState.seq.indexOf(it),1);
+      orderState.pool.push(it);
+      paintOrder();
+    });
+    seq.appendChild(c);
+  });
+
+  if(orderState.pool.length === 0) pool.innerHTML = '<div class="empty-note">Все шаги распределены</div>';
+  if(orderState.seq.length === 0)  seq.innerHTML  = '<div class="empty-note">Нажми на шаг слева</div>';
+}
+
+/* =========================================================
+   ПРОВЕРКА ОТВЕТА
+   ========================================================= */
+function checkAnswer(){
+  if(state.answered) return;
+  const t = TASKS[state.i];
+  let ok = false;
+  let note = '';
+
+  /* --- один ответ / верно-неверно --- */
+  if(t.type === 'single' || t.type === 'tf'){
+    if(selOption === null){ shakeCheck(); return; }
+    const opts = $('#answerArea').querySelectorAll('.option');
+
+    if(t.type === 'single'){
+      ok = (selOption === t.correct);
+      opts.forEach((el,i)=>{
+        el.classList.remove('selected');
+        if(i === t.correct) el.classList.add('correct');
+        else if(i === selOption) el.classList.add('wrong');
+      });
+      if(!ok) note = 'Правильный ответ: <b>' + t.options[t.correct] + '</b>';
+    } else {
+      ok = (selOption === t.correct);
+      const vals = [true, false];
+      opts.forEach((el,i)=>{
+        el.classList.remove('selected');
+        if(vals[i] === t.correct) el.classList.add('correct');
+        else if(vals[i] === selOption) el.classList.add('wrong');
+      });
+      if(!ok) note = 'Правильный ответ: <b>' + (t.correct ? 'Верно' : 'Неверно') + '</b>';
+    }
+  }
+
+  /* --- соответствие --- */
+  else if(t.type === 'match'){
+    if(Object.keys(matchState.assign).length < t.pairs.length){ shakeCheck(); return; }
+    ok = true;
+    for(let i = 0; i < t.pairs.length; i++){
+      const a = matchState.assign[i];
+      if(a === undefined || matchState.defs[a].pi !== i) ok = false;
+    }
+    const area = $('#answerArea');
+    area.querySelectorAll('[data-side="left"]').forEach(el=>{
+      const i = +el.dataset.idx;
+      const a = matchState.assign[i];
+      el.classList.add((a !== undefined && matchState.defs[a].pi === i) ? 'correct' : 'wrong');
+    });
+    area.querySelectorAll('[data-side="right"]').forEach(el=>{
+      const i = +el.dataset.idx;
+      let good = false;
+      for(const k in matchState.assign){
+        if(matchState.assign[k] === i && matchState.defs[i].pi === +k) good = true;
+      }
+      el.classList.add(good ? 'correct' : 'wrong');
+    });
+    if(!ok) note = 'Правильные пары: <b>' + t.pairs.map(p=>p.term + ' → ' + p.definition).join('; ') + '</b>';
+  }
+
+  /* --- корзины / классификация --- */
+  else if(t.type === 'basket' || t.type === 'classify'){
+    if(basketState.place.some(p=> p === null)){ shakeCheck(); return; }
+    ok = t.items.every((it,i)=> basketState.place[i] === it.basket);
+    document.querySelectorAll('.chip').forEach(ch=>{
+      const i = +ch.dataset.item;
+      ch.classList.add(basketState.place[i] === t.items[i].basket ? 'correct' : 'wrong');
+    });
+    if(!ok) note = 'Правильно: <b>' + t.items.map(it=> it.text + ' — ' + t.baskets[it.basket]).join('; ') + '</b>';
+  }
+
+  /* --- порядок --- */
+  else if(t.type === 'order'){
+    if(orderState.seq.length < t.items.length){ shakeCheck(); return; }
+    ok = orderState.seq.every((it,k)=> it.i === k);
+    if(!ok) note = 'Правильный порядок: <b>' + t.items.map((s,i)=> (i+1) + '. ' + s).join(' → ') + '</b>';
+  }
+
+  /* --- фиксация --- */
+  state.answered = true;
+  state.results[state.i] = ok;
+
+  $('#checkBtn').classList.add('hidden');
+  $('#nextBtn').classList.remove('hidden');
+
+  const fb = $('#feedback');
+  fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+  let html = '<div class="fb-title">' + (ok ? '✅ Верно!' : '❌ Не совсем верно') + '</div>';
+  if(note) html += '<div class="fb-note">' + note + '</div>';
+  if(!ok && t.hint) html += '<div class="fb-note">💡 ' + t.hint + '</div>';
+  fb.innerHTML = html;
+  fb.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* =========================================================
+   ПЕРЕХОД ДАЛЬШЕ
+   ========================================================= */
+function nextTask(){
+  if(state.i === 21){
+    $('#stageOverlay').classList.remove('hidden');
+    return;
+  }
+  state.i++;
+  if(state.i >= TASKS.length){ showResult(); return; }
+  renderTask();
+}
+
+/* =========================================================
+   ИТОГОВЫЙ ЭКРАН
+   ========================================================= */
+function showResult(){
+  const s1 = state.results.slice(0,22).filter(r=> r === true).length;
+  const s2 = state.results.slice(22).filter(r=> r === true).length;
+
+  let p1 = Math.round(8 * s1 / 22);
+  let p2 = Math.floor(2 * s2 / 8);
+  let total = Math.min(10, p1 + p2);
+  const correct = s1 + s2;
+
+  $('#resName').textContent = state.name;
+  $('#resCorrect').textContent = correct;
+  $('#resScore').textContent = total;
+  $('#resBreak').innerHTML =
+    'Этап 1 «Базовый»: <b>' + s1 + '/22</b> верных &nbsp;·&nbsp; ' +
+    'Этап 2 «Продвинутый»: <b>' + s2 + '/8</b> верных &nbsp;·&nbsp; ' +
+    'баллы: <b>' + p1 + '</b> + <b>' + p2 + '</b>';
+
+  /* подсветка дескриптора */
+  document.querySelectorAll('.descr-table tr').forEach(tr=> tr.classList.remove('active'));
+  let lvl = '13';
+  if(total === 10)      lvl = '10';
+  else if(total >= 8)   lvl = '89';
+  else if(total >= 6)   lvl = '67';
+  else if(total >= 4)   lvl = '45';
+  const row = document.querySelector('.descr-table tr[data-lvl="'+lvl+'"]');
+  if(row) row.classList.add('active');
+
+  showScreen('screen-result');
+}
+
+/* =========================================================
+   СОБЫТИЯ
+   ========================================================= */
+$('#hintBtn').addEventListener('click', ()=>{
+  $('#hintBox').classList.toggle('hidden');
+});
+$('#checkBtn').addEventListener('click', checkAnswer);
+$('#nextBtn').addEventListener('click', nextTask);
+
+$('#toStage2Btn').addEventListener('click', ()=>{
+  $('#stageOverlay').classList.add('hidden');
+  state.i = 22;
+  renderTask();
+});
+
+$('#resetBtn').addEventListener('click', ()=>{
+  state.name = '';
+  state.i = 0;
+  state.results = new Array(TASKS.length).fill(null);
+  state.answered = false;
+  selOption = null; matchState = null; basketState = null; orderState = null;
+
+  nameInput.value = '';
+  startBtn.disabled = true;
+  nameHint.textContent = 'Введите минимум 2 символа, чтобы начать работу';
+  nameHint.classList.remove('ok');
+  $('#progressFill').style.width = '0%';
+  $('#stageOverlay').classList.add('hidden');
+
+  showScreen('screen-start');
+  nameInput.focus();
+});
+
+/* фокус на поле имени при загрузке */
+window.addEventListener('load', ()=> nameInput.focus());
+</script>
+</body>
+</html>
